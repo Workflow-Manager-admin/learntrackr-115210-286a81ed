@@ -8,7 +8,18 @@ const COLORS = {
   accent: "#ffc107"
 };
 
-const API_BASE = "http://localhost:4000"; // Backend API URL
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:4000"; // Backend API URL
+
+// Utility to check and log fetch errors for easier debugging
+function logFetchError(name, error, res) {
+  // Log to console for devs, show diagnostic if needed
+  // eslint-disable-next-line no-console
+  console.error(`[API] Failed to fetch ${name}:`, error);
+  if (res) {
+    // eslint-disable-next-line no-console
+    console.error(`[API] Response:`, res);
+  }
+}
 
 // Util helpers
 function formatDate(iso) {
@@ -374,9 +385,22 @@ function App() {
           fetch(`${API_BASE}/status-options`),
           fetch(`${API_BASE}/progress`)
         ]);
+        if (!res1.ok) {
+          const msg = `Status options API error (${res1.status})`;
+          logFetchError("status-options", msg, res1);
+          setError("Failed to fetch status options");
+          return;
+        }
+        if (!res2.ok) {
+          const msg = `Progress API error (${res2.status})`;
+          logFetchError("progress", msg, res2);
+          setError("Failed to fetch stats");
+          return;
+        }
         setStatuses(await res1.json());
         setStats(await res2.json());
       } catch (e) {
+        logFetchError("status or stats", e);
         setError("Failed to fetch status or stats");
       }
     }
@@ -393,9 +417,16 @@ function App() {
     if (params.length) url += `?${params.join("&")}`;
     try {
       const res = await fetch(url);
-      setTopics(await res.json());
+      if (!res.ok) {
+        logFetchError("topics", `API error (${res.status})`, res);
+        setError("Failed to fetch topics (API error)");
+        setTopics([]);
+      } else {
+        setTopics(await res.json());
+      }
     } catch (e) {
-      setError("Failed to fetch topics");
+      logFetchError("topics", e);
+      setError("Failed to fetch topics. Backend unreachable?");
       setTopics([]);
     }
     setLoading(false);

@@ -9,6 +9,18 @@ This project provides a minimal React template with a clean, modern UI and minim
 - **Fast**: Minimal dependencies for quick loading times
 - **Simple**: Easy to understand and modify
 
+## Backend API Endpoint Configuration
+
+The frontend connects to the backend API via the `REACT_APP_API_BASE_URL` environment variable.
+- By default this is set to `http://localhost:4000` in `.env` (for local development).
+- For production or cloud deployment, adjust `.env` to the remote backend endpoint.
+
+Example `.env` file:
+```
+REACT_APP_API_BASE_URL=http://localhost:4000
+```
+If the backend runs on a different machine, port, or domain, update the value accordingly.
+
 ## Getting Started
 
 In the project directory, you can run:
